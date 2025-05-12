@@ -5,9 +5,9 @@ from sklearn.feature_selection import mutual_info_classif
 
 
 # dataframes
-dfAccident = pd.read_csv('accident_clean.csv')
-dfFilteredVehicle = pd.read_csv('filtered_vehicle.csv')
-dfPerson = pd.read_csv('person.csv')
+dfAccident = pd.read_csv('datasets/accident_clean.csv')
+dfFilteredVehicle = pd.read_csv('datasets/filtered_vehicle.csv')
+dfPerson = pd.read_csv('datasets/person.csv')
 
 
 # ----------severity vs light conditions----------
