@@ -1,2 +1,2 @@
 # COMP20008-Project-2
-First assignment of Elements of Data Processing (COMP20008) at The University of Melbourne.
+Second assignment of Elements of Data Processing (COMP20008) at The University of Melbourne.
