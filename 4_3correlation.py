@@ -20,7 +20,7 @@ plt.ylabel('Light Conditions')
 plt.title('Severity vs Light Conditions')
 
 plt.tight_layout()
-plt.savefig('severity_VS_lightConditions.png')
+plt.savefig('output/severity_VS_lightConditions.png')
 plt.close()
 
 x1 = dfAccident[['LIGHT_CONDITION']] 
@@ -40,7 +40,7 @@ plt.ylabel('Road Geometry')
 plt.title('Severity vs Road Geometry')
 
 plt.tight_layout()
-plt.savefig('severity_VS_roadGeometry.png')
+plt.savefig('output/severity_VS_roadGeometry.png')
 plt.close()
 
 x2 = dfAccident[['ROAD_GEOMETRY']] 
@@ -60,7 +60,7 @@ plt.ylabel('Atmosphere Condition')
 plt.title('Severity vs Atmosphere Condition')
 
 plt.tight_layout()
-plt.savefig('severity_VS_atmoCond.png')
+plt.savefig('output/severity_VS_atmoCond.png')
 plt.close()
 
 
@@ -81,7 +81,7 @@ plt.ylabel('Surface Condition')
 plt.title('Severity vs Surface Condition')
 
 plt.tight_layout()
-plt.savefig('severity_VS_surfCond.png')
+plt.savefig('output/severity_VS_surfCond.png')
 plt.close()
 
 
@@ -103,7 +103,7 @@ plt.title('Level of Damage vs Vehicle Type')
 
 plt.tight_layout()
 plt.subplots_adjust(right=0.85)
-plt.savefig('lvlDmg_VS_vehicleType.png')
+plt.savefig('output/lvlDmg_VS_vehicleType.png')
 plt.close()
 
 
@@ -125,7 +125,7 @@ plt.ylabel = ('Injury Level')
 plt.title('Injury Level vs Sex')
 
 plt.tight_layout()
-plt.savefig('injLvl_VS_sex.png')
+plt.savefig('output/injLvl_VS_sex.png')
 plt.close()
 
 dfPerson['SEX_NUM'] = dfPerson['SEX'].map({'M': 0, 'F': 1, 'U': 2})
@@ -148,7 +148,7 @@ plt.ylabel = ('Severity')
 plt.title('Severity vs Age Group')
 
 plt.tight_layout()
-plt.savefig('severity_VS_ageGroup.png')
+plt.savefig('output/severity_VS_ageGroup.png')
 plt.close()
 
 
