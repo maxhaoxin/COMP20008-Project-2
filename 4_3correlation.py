@@ -115,4 +115,12 @@ def heatmap_initiation (x_features, labels, width, height):
 atmosph = dfAccident['ATMOSPH_COND']
 heatmap_initiation(atmosph, 'Atmospheric Condition',10,5)
 
+roadGeo = dfAccident['ROAD_GEOMETRY_DESC']
+heatmap_initiation(roadGeo, 'Road Geometry',10,5)
+
+Light = dfAccident['LIGHT_CONDITION']
+heatmap_initiation(light, 'Light Condition',10,5)
+
+surface = dfAccident['SURFACE_COND_DESC']
+heatmap_initiation(surface, 'Surface Condition',10,5)
 
