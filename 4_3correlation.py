@@ -108,6 +108,7 @@ def heatmap_initiation (x_features, labels, width, height):
     plt.ylabel('Severity',fontsize=12)
     plt.xlabel(labels,fontsize=12)
     plt.title('Severity vs '+labels, fontsize=12)
+    plt.tight_layout()
     plt.show()
     return heatmap_initiation
 
