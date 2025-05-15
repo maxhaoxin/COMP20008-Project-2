@@ -1,162 +1,127 @@
 import pandas as pd
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import mutual_info_classif
 
 
 # dataframes
 dfAccident = pd.read_csv('datasets/accident_clean.csv')
-dfFilteredVehicle = pd.read_csv('datasets/filtered_vehicle.csv')
-dfPerson = pd.read_csv('datasets/person.csv')
 
+# For better calling, we declare each column as new variable
 
-# ----------severity vs light conditions----------
-hm1_data = dfAccident.groupby(['LIGHT_CONDITION','SEVERITY_DESC']).size().unstack(fill_value=0)
+severity = dfAccident['SEVERITY_ORD']
+atmosph = dfAccident['ATMOSPH_COND']
+surface = dfAccident['SURFACE_COND']
+v_age = dfAccident['VEHICLE_AGE']
+occup = dfAccident['NUM_PEOPLE']
+v_type = dfAccident['VEHICLE_TYPE_MODE']
+age_g = dfAccident['AGE_CODE']
+seat = dfAccident['SEATING_MODE']
+light = dfAccident['LIGHT_CONDITION']
+atm_risk = dfAccident['ATM_RISK']
+road_risk = dfAccident['ROAD_RISK']
+road_geom = dfAccident['ROAD_GEOMETRY']
 
-sns.heatmap(hm1_data, annot=True, fmt = 'd', cmap= 'Reds')
+# This whole block of NMI computation code obtained from the Tutorial Week 7
 
-plt.xlabel('Severity')
-plt.ylabel('Light Conditions')
-plt.title('Severity vs Light Conditions')
+# Defining Probability Computation
+def compute_probability(col):
+    return col.value_counts() / len(col)
 
-plt.tight_layout()
-plt.savefig('output/severity_VS_lightConditions.png')
-plt.close()
+# Defining Entropy Computation
+def compute_entropy(col):
+    probabilities = compute_probability(col)
+    entropy = -sum(probabilities * np.log2(probabilities))
+    return entropy
 
-x1 = dfAccident[['LIGHT_CONDITION']] 
-y1 = dfAccident['SEVERITY_ORD'] 
+# Defining Conditional Entropy of Y given X
+def compute_conditional_entropy(x, y):
+    probability_x = compute_probability(x)
+    temp_df = pd.DataFrame({'X': x, 'Y': y})
+    entropy_by_group = temp_df.groupby('X')['Y'].aggregate(compute_entropy)
+    conditional_entropy = sum(probability_x * entropy_by_group)
+    return conditional_entropy
 
-# get MI
-mi1 = mutual_info_classif(x1, y1, discrete_features=True)
+# Defining NMI function
+def NMI(x, y):
+    # H(X) and H(Y)
+    entropy_x = compute_entropy(x)
+    entropy_y = compute_entropy(y)
+    
+    # H(Y|X)
+    conditional_entropy = compute_conditional_entropy(x, y)
+    
+    # MI(X, Y)
+    MI = entropy_y - conditional_entropy 
+    # same as MI = entropy_x - compute_conditional_entropy(y, x)
+    return MI / min(entropy_x, entropy_y)
 
-print("MI for light condition vs severity:", mi1[0])
+x_features = {'Atm_Cond':atmosph,
+           'Surf_Cond':surface,
+           'Veh_Age':v_age,
+           'Occup':occup,
+           'Veh_Type':v_type,
+           'Age_G':age_g,
+           'Seats':seat,
+           'Road_Risk':road_risk,
+           'Atm_Risk':atm_risk,
+           'Road_Geom':road_geom,
+           'Light_Cond':light}
 
-# ----------severity vs road geometry----------
-hm2_data = dfAccident.groupby(['ROAD_GEOMETRY_DESC','SEVERITY_DESC']).size().unstack(fill_value=0)
+labels=list(x_features.keys())
+features = list(x_features.values())
 
-sns.heatmap(hm2_data,  annot=True, fmt = 'd', cmap= 'Blues')
-plt.xlabel('Severity')
-plt.ylabel('Road Geometry')
-plt.title('Severity vs Road Geometry')
+n=len(features)
 
-plt.tight_layout()
-plt.savefig('output/severity_VS_roadGeometry.png')
-plt.close()
+# We use AI tools to get the general idea how to build a matrix with python
 
-x2 = dfAccident[['ROAD_GEOMETRY']] 
-y2 = dfAccident['SEVERITY_ORD'] 
+nmi_matrix = pd.DataFrame(np.zeros((n, n)), index=labels, columns=labels)
 
-# get MI
-mi2 = mutual_info_classif(x2, y2, discrete_features=True)
+# Looping NMI for each features i and j
+for i in range(n):
+    for j in range (i+1, n):
+        nmi_val = NMI(features[i], features[j])
+        
+        nmi_matrix.iloc[i, j] = nmi_val
+        nmi_matrix.iloc[j, i] = nmi_val
 
-print("MI for road geometry vs severity:", mi2[0])
+# Colorize Matrix for better view
+nmi_color = nmi_matrix.style.background_gradient(cmap='Reds').format("{:.4f}")
+display(nmi_color)
 
-# ----------severity vs Atmosphere Condition----------
-hm3_data = dfAccident.groupby(['ATMOSPH_COND_DESC','SEVERITY_DESC']).size().unstack(fill_value=0)
+severity_desc = dfAccident['SEVERITY_DESC']
+severity_order = ['Fatal accident', 'Serious injury accident',
+                  'Other injury accident', 'Non injury accident']
 
-sns.heatmap(hm3_data,  annot=True, fmt = 'd', cmap= 'Greens')
-plt.xlabel('Severity')
-plt.ylabel('Atmosphere Condition')
-plt.title('Severity vs Atmosphere Condition')
+# Defining Function to Draw the heatmap
 
-plt.tight_layout()
-plt.savefig('output/severity_VS_atmoCond.png')
-plt.close()
+def heatmap_initiation (x_features, labels, width, height):
+    fig, ax = plt.subplots(figsize=(width,height))
+    hm= pd.DataFrame({
+        labels: x_features,
+        'SEVERITY': severity_desc}).groupby(['SEVERITY',labels]).size().unstack(fill_value=0)
+    
+    # Order the Severity of Accident
+    hm = hm.reindex(severity_order)
+    sns.heatmap(hm, annot=True, fmt='d', cmap='Reds')
+    plt.ylabel('Severity',fontsize=12)
+    plt.xlabel(labels,fontsize=12)
+    plt.title('Severity vs '+labels, fontsize=12)
+    plt.tight_layout()
+    plt.show()
+    return heatmap_initiation
 
+# Example Code
+atmosph = dfAccident['ATMOSPH_COND']
+heatmap_initiation(atmosph, 'Atmospheric Condition',10,5)
 
-x3 = dfAccident[['ATMOSPH_COND']] 
-y3 = dfAccident['SEVERITY_ORD'] 
+roadGeo = dfAccident['ROAD_GEOMETRY_DESC']
+heatmap_initiation(roadGeo, 'Road Geometry',10,5)
 
-# get MI
-mi3 = mutual_info_classif(x3, y3, discrete_features=True)
+light = dfAccident['LIGHT_CONDITION']
+heatmap_initiation(light, 'Light Condition',10,5)
 
-print("MI for atmosphere condition vs severity:", mi3[0])
+surface = dfAccident['SURFACE_COND_DESC']
+heatmap_initiation(surface, 'Surface Condition',10,5)
 
-# ----------severity vs Surface Condition----------
-hm4_data = dfAccident.groupby(['SURFACE_COND_DESC','SEVERITY_DESC']).size().unstack(fill_value=0)
-
-sns.heatmap(hm4_data,  annot=True, fmt = 'd', cmap= 'Purples')
-plt.xlabel('Severity')
-plt.ylabel('Surface Condition')
-plt.title('Severity vs Surface Condition')
-
-plt.tight_layout()
-plt.savefig('output/severity_VS_surfCond.png')
-plt.close()
-
-
-x4 = dfAccident[['SURFACE_COND']] 
-y4 = dfAccident['SEVERITY_ORD'] 
-
-# get MI
-mi4 = mutual_info_classif(x4, y4, discrete_features=True)
-
-print("MI for surface condition vs severity:", mi4[0])
-
-# ----------level of damage vs vehicle type----------
-hm5_data = dfFilteredVehicle.groupby(['VEHICLE_TYPE_DESC','LEVEL_OF_DAMAGE']).size().unstack(fill_value=0)
-
-sns.heatmap(hm5_data,  annot=False, fmt = 'd', cmap= 'Oranges')
-plt.xlabel = ('Vehicle Type')
-plt.ylabel = ('Level of Damage')
-plt.title('Level of Damage vs Vehicle Type')
-
-plt.tight_layout()
-plt.subplots_adjust(right=0.85)
-plt.savefig('output/lvlDmg_VS_vehicleType.png')
-plt.close()
-
-
-x5 = dfFilteredVehicle[['VEHICLE_TYPE']] 
-y5 = dfFilteredVehicle['LEVEL_OF_DAMAGE'] 
-
-# get MI
-mi5 = mutual_info_classif(x5, y5, discrete_features=True)
-
-print("MI for level of damage vs vehicle type:", mi5[0])
-
-
-# ----------Injury Level vs Sex----------
-hm6_data = dfPerson.groupby(['SEX','INJ_LEVEL_DESC']).size().unstack(fill_value=0)
-
-sns.heatmap(hm6_data,  annot=True, fmt = 'd', cmap= 'Oranges')
-plt.xlabel = ('Sex')
-plt.ylabel = ('Injury Level')
-plt.title('Injury Level vs Sex')
-
-plt.tight_layout()
-plt.savefig('output/injLvl_VS_sex.png')
-plt.close()
-
-dfPerson['SEX_NUM'] = dfPerson['SEX'].map({'M': 0, 'F': 1, 'U': 2})
-
-dfPersonFull = dfPerson.dropna(subset=['SEX_NUM', 'INJ_LEVEL'])
-x6 = dfPersonFull[['SEX_NUM']] 
-y6 = dfPersonFull['INJ_LEVEL'] 
-
-# get MI
-mi6 = mutual_info_classif(x6, y6, discrete_features=True)
-
-print("MI for injury level vs sex:", mi6[0])
-
-# ----------Severity vs Age group----------
-hm7_data = dfAccident.groupby(['AGE_GROUP_MODE','SEVERITY_DESC']).size().unstack(fill_value=0)
-
-sns.heatmap(hm7_data,  annot=True, fmt = 'd', cmap= 'Oranges')
-plt.xlabel = ('Age Group')
-plt.ylabel = ('Severity')
-plt.title('Severity vs Age Group')
-
-plt.tight_layout()
-plt.savefig('output/severity_VS_ageGroup.png')
-plt.close()
-
-
-#dfPersonFull = dfPerson.dropna(subset=['AGE_GROUP_NUM', 'INJ_LEVEL'])
-x7 = dfAccident[['AGE_CODE']] 
-y7 = dfAccident['SEVERITY_ORD'] 
-
-# get MI
-mi7 = mutual_info_classif(x7, y7, discrete_features=True)
-
-print("MI for injury level vs age group:", mi7[0])
