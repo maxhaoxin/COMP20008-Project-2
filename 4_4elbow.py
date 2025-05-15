@@ -10,16 +10,24 @@ df = pd.read_csv('datasets/accident_clean.csv')
 
 def task4_4elbow():
     #print('aaaa')
-    grouped = df.groupby(['SURFACE_COND_DESC', 'ATMOSPH_COND_DESC', 'ROAD_GEOMETRY_DESC', 'AGE_GROUP_MODE','LIGHT_CONDITION'])
+    grouped = df.groupby([
+        'SURFACE_COND_DESC',
+        'ATMOSPH_COND_DESC',
+        'ROAD_GEOMETRY_DESC',
+        'AGE_GROUP_MODE',
+        'LIGHT_CONDITION'
+    ])
+    
     aggregated = grouped.agg({
-        'SEVERITY_ORD': 'mean',
-        'SEVERE_INJURED': 'mean',
-        'VEHICLE_AGE': 'mean',
-        'NUM_PEOPLE': 'mean',
-        'ACCIDENT_NO': 'count'        
+        'VEHICLE_AGE_NORM': 'mean',
+        'TOTAL_OCCUPANTS_NORM': 'mean',
+        'CRASH_COUNT': 'count',
+        'ROAD_RISK': 'mean',
+        'ATM_RISK': 'mean',
+        'WEATHER_RISK_NORM': 'mean'        
     }).reset_index().rename(columns={'ACCIDENT_NO': 'CRASH_COUNT'})
     
-    features = aggregated[['SEVERITY_ORD', 'SEVERE_INJURED', 'VEHICLE_AGE', 'NUM_PEOPLE', 'CRASH_COUNT']]
+    features = aggregated[['VEHICLE_AGE_NORM', 'TOTAL_OCCUPANTS_NORM', 'CRASH_COUNT', 'ROAD_RISK', 'ATM_RISK', 'WEATHER_RISK_NORM']]
 
     scaler = StandardScaler()
     normalised_features = scaler.fit_transform(features)
