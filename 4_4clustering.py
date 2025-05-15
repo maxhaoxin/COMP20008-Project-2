@@ -59,7 +59,7 @@ def clustering():
 
     for cluster_id in range(4):
         cluster_data = aggregated[aggregated['CLUSTER'] == cluster_id]
-        top10 = cluster_data.sort_values(by='CLUSTER', ascending=False).head(10)
+        top10 = cluster_data.sort_values(by='CLUSTER', ascending=False).head(50)
         top10.to_csv(f'4_4cluster_{cluster_id}.csv', index=False)
         
     return()
