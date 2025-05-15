@@ -14,20 +14,21 @@ def task4_4elbow():
         'SURFACE_COND_DESC',
         'ATMOSPH_COND_DESC',
         'ROAD_GEOMETRY_DESC',
-        'AGE_GROUP_MODE',
+        'AGE_GROUP',
         'LIGHT_CONDITION'
     ])
     
     aggregated = grouped.agg({
         'VEHICLE_AGE_NORM': 'mean',
         'TOTAL_OCCUPANTS_NORM': 'mean',
-        'CRASH_COUNT': 'count',
-        'ROAD_RISK': 'mean',
-        'ATM_RISK': 'mean',
-        'WEATHER_RISK_NORM': 'mean'        
+        'ACCIDENT_NO': 'count',
+        'WEATHER_RISK': 'mean',
+        'SPEED_ZONE_BINARY': 'mean',
+        'ATMOSPH_COND_RISK': 'mean',
+        'SURFACE_COND_RISK': 'mean'       
     }).reset_index().rename(columns={'ACCIDENT_NO': 'CRASH_COUNT'})
     
-    features = aggregated[['VEHICLE_AGE_NORM', 'TOTAL_OCCUPANTS_NORM', 'CRASH_COUNT', 'ROAD_RISK', 'ATM_RISK', 'WEATHER_RISK_NORM']]
+    features = aggregated[['VEHICLE_AGE_NORM', 'TOTAL_OCCUPANTS_NORM', 'CRASH_COUNT', 'WEATHER_RISK', 'SPEED_ZONE_BINARY', 'ATMOSPH_COND_RISK', 'SURFACE_COND_RISK']]
 
     scaler = StandardScaler()
     normalised_features = scaler.fit_transform(features)
