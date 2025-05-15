@@ -46,9 +46,10 @@ def clustering():
     kmeans = KMeans(n_clusters=7, random_state=42)
     aggregated['CLUSTER'] = kmeans.fit_predict(normalised_features)
     
-    sns.countplot(x='CLUSTER', hue = 'AGE_GROUP_MODE', data=aggregated)
-    plt.title('Cluster Distribution by Age Group')
-    plt.show()
+    #sns.countplot(x='CLUSTER', hue = 'AGE_GROUP_MODE', data=aggregated)
+    #plt.title('Cluster Distribution by Age Group')
+    #plt.show()
+
 
     for cluster_id in range(7):
         cluster_data = aggregated[aggregated['CLUSTER'] == cluster_id]
